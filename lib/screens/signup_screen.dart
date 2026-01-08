@@ -82,9 +82,11 @@ class _SignupScreenState extends State<SignupScreen> {
               Row(
                 children: [
                   _buildRoleCard(UserRole.customer, lp.translate('customer'), Icons.person),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
+                  _buildRoleCard(UserRole.workshopOwner, lp.translate('workshopOwner'), Icons.build),
+                  const SizedBox(width: 8),
                   _buildRoleCard(UserRole.driver, lp.translate('driver'), Icons.local_shipping),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
                   _buildRoleCard(UserRole.supplier, lp.translate('supplier'), Icons.store),
                 ],
               ),
@@ -111,7 +113,21 @@ class _SignupScreenState extends State<SignupScreen> {
               ElevatedButton(
                 onPressed: (_isLoading || !_acceptTerms) ? null : () async {
                   setState(() => _isLoading = true);
-                  // Implementation for registration logic...
+                  
+                  await ap.signup(
+                    _nameController.text,
+                    _emailController.text,
+                    _passwordController.text,
+                    _phoneController.text,
+                    _selectedRole,
+                    driverType: _selectedRole == UserRole.driver 
+                      ? (_driverType == 'towDriver' ? DriverType.towTruck : DriverType.regularService)
+                      : null,
+                    workshopName: _selectedRole == UserRole.workshopOwner ? _storeNameController.text : null,
+                    specialization: _selectedRole == UserRole.workshopOwner ? _specializationController.text : null,
+                    location: _cityController.text,
+                  );
+
                   if (mounted) {
                     setState(() => _isLoading = false);
                     _showSuccessDialog(lp);
@@ -198,11 +214,37 @@ class _SignupScreenState extends State<SignupScreen> {
     switch (_selectedRole) {
       case UserRole.customer:
         return _buildCustomerForm(lp);
+      case UserRole.workshopOwner:
+        return _buildWorkshopForm(lp);
       case UserRole.driver:
         return _buildDriverForm(lp);
       case UserRole.supplier:
         return _buildSupplierForm(lp);
     }
+  }
+
+  Widget _buildWorkshopForm(LanguageProvider lp) {
+    return Column(
+      children: [
+        _buildTextField(controller: _nameController, label: lp.translate('fullName'), hintText: lp.translate('fullNameHint'), icon: Icons.person_outline),
+        const SizedBox(height: 16),
+        _buildTextField(controller: _emailController, label: lp.translate('email'), hintText: lp.translate('emailHint'), icon: Icons.email_outlined),
+        const SizedBox(height: 16),
+        _buildTextField(controller: _phoneController, label: lp.translate('phone'), hintText: lp.translate('phoneHint'), icon: Icons.phone_outlined),
+        const SizedBox(height: 16),
+        _buildTextField(controller: _passwordController, label: lp.translate('password'), hintText: lp.translate('passwordHint'), icon: Icons.lock_outline, isPassword: true),
+        const SizedBox(height: 16),
+        _buildTextField(controller: _confirmPasswordController, label: lp.translate('confirmPassword'), hintText: lp.translate('confirmPasswordHint'), icon: Icons.lock_clock_outlined, isPassword: true),
+        const SizedBox(height: 16),
+        _buildTextField(controller: _storeNameController, label: lp.translate('storeName'), hintText: lp.translate('storeNameHint'), icon: Icons.build_circle_outlined),
+        const SizedBox(height: 16),
+        _buildTextField(controller: _cityController, label: lp.translate('city'), hintText: lp.translate('cityHint'), icon: Icons.location_city_outlined),
+        const SizedBox(height: 16),
+        _buildTextField(controller: _specializationController, label: lp.translate('specialization'), hintText: "ميكانيكا، كهرباء، إلخ", icon: Icons.category_outlined),
+        const SizedBox(height: 24),
+        _buildUploadBtn(lp.translate('storeLocation'), Icons.map),
+      ],
+    );
   }
 
   Widget _buildCustomerForm(LanguageProvider lp) {

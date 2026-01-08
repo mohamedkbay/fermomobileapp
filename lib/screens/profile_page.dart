@@ -87,13 +87,17 @@ class ProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
           ],
-          if (user?.role == UserRole.driver || user?.role == UserRole.supplier) ...[
+          if (user?.role == UserRole.driver || user?.role == UserRole.supplier || user?.role == UserRole.workshopOwner) ...[
             _buildInfoCard(
               context,
               lp.translate('businessInfo'),
               [
                 if (user?.role == UserRole.driver && user?.driverType != null)
                   _buildBusinessRow(lp.translate('vehicleType'), user!.driverType!.name),
+                if (user?.role == UserRole.workshopOwner) ...[
+                  _buildBusinessRow(lp.translate('storeName'), user?.workshopName ?? ''),
+                  _buildBusinessRow(lp.translate('specialization'), user?.specialization ?? ''),
+                ],
                 _buildBusinessRow('ID', '#${user?.id}'),
               ],
             ),

@@ -50,7 +50,7 @@ class _ServiceRequestFormsState extends State<ServiceRequestForms> {
   // Demo Data Lists
   final List<String> _vehicleTypes = ['sedan', 'suv', 'pickup', 'van'];
   final List<String> _vehicleConditions = ['accident', 'breakdown', 'stuck'];
-  final List<String> _paymentMethods = ['cash', 'online'];
+  final List<String> _paymentMethods = ['cash', 'card'];
   
   final List<String> _partCategories = ['engine', 'electrical', 'body', 'suspension'];
   final List<String> _preferredPartTypes = ['original', 'aftermarket', 'any'];
@@ -68,7 +68,10 @@ class _ServiceRequestFormsState extends State<ServiceRequestForms> {
     final user = Provider.of<AuthProvider>(context, listen: false).user;
     if (user != null) {
       _nameController.text = user.name;
-      _phoneController.text = user.phone; // Assuming phone exists in user model, otherwise empty
+      _phoneController.text = user.phone;
+      if (user.role == UserRole.workshopOwner && user.location != null) {
+        _locationBController.text = user.location!;
+      }
     }
   }
 

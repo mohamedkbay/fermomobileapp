@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum UserRole { customer, driver, supplier }
+enum UserRole { customer, driver, supplier, workshopOwner }
 enum DriverType { towTruck, mobileWorkshop, regularService }
 
 class User {
@@ -15,6 +15,8 @@ class User {
   final String? carYear;
   final String? location;
   final String? personalCode;
+  final String? workshopName;
+  final String? specialization;
 
   User({
     required this.id,
@@ -28,6 +30,8 @@ class User {
     this.carYear,
     this.location,
     this.personalCode,
+    this.workshopName,
+    this.specialization,
   });
 }
 
@@ -53,6 +57,9 @@ class AuthProvider with ChangeNotifier {
     } else if (email.contains('supplier')) {
       role = UserRole.supplier;
       name = 'Best Parts Store';
+    } else if (email.contains('workshop')) {
+      role = UserRole.workshopOwner;
+      name = 'ورشة الأمل';
     }
 
     _user = User(
@@ -67,11 +74,18 @@ class AuthProvider with ChangeNotifier {
       carYear: role == UserRole.customer ? '2024' : null,
       location: 'Riyadh, Saudi Arabia',
       personalCode: 'FR-9921',
+      workshopName: role == UserRole.workshopOwner ? 'ورشة الأمل المتكاملة' : null,
+      specialization: role == UserRole.workshopOwner ? 'ميكانيكا وكهرباء' : null,
     );
     notifyListeners();
   }
 
-  Future<void> signup(String name, String email, String password, String phone, UserRole role, {DriverType? driverType}) async {
+  Future<void> signup(String name, String email, String password, String phone, UserRole role, {
+    DriverType? driverType,
+    String? workshopName,
+    String? specialization,
+    String? location,
+  }) async {
     // Mock signup
     await Future.delayed(const Duration(seconds: 1));
     _user = User(
@@ -81,6 +95,9 @@ class AuthProvider with ChangeNotifier {
       phone: phone,
       role: role,
       driverType: driverType,
+      workshopName: workshopName,
+      specialization: specialization,
+      location: location,
     );
     notifyListeners();
   }

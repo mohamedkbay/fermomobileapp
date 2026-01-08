@@ -14,6 +14,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
@@ -94,6 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _demoBtn(ap, 'customer@demo.com', lp.translate('customer'), Icons.person),
+              _demoBtn(ap, 'workshop@demo.com', lp.translate('workshopOwner'), Icons.build),
               _demoBtn(ap, 'tow_driver@demo.com', lp.translate('towTruck'), Icons.build),
               _demoBtn(ap, 'driver@demo.com', lp.translate('deliveryDriver'), Icons.delivery_dining),
               _demoBtn(ap, 'supplier@demo.com', lp.translate('supplier'), Icons.store),
@@ -139,19 +141,44 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 40),
-              _buildTextField(
-                controller: _emailController,
-                label: lp.translate('email'),
-                hintText: lp.translate('emailHint'),
-                icon: Icons.email_outlined,
-              ),
-              const SizedBox(height: 20),
-              _buildTextField(
-                controller: _passwordController,
-                label: lp.translate('password'),
-                hintText: lp.translate('passwordHint'),
-                icon: Icons.lock_outline,
-                isPassword: true,
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    _buildTextField(
+                      controller: _emailController,
+                      label: lp.translate('email'),
+                      hintText: lp.translate('emailHint'),
+                      icon: Icons.email_outlined,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return lp.translate('requiredField');
+                        }
+                        if (!value.contains('@')) {
+                          return lp.translate('invalidEmail');
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    _buildTextField(
+                      controller: _passwordController,
+                      label: lp.translate('password'),
+                      hintText: lp.translate('passwordHint'),
+                      icon: Icons.lock_outline,
+                      isPassword: true,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return lp.translate('requiredField');
+                        }
+                        if (value.length < 6) {
+                          return lp.isRTL ? "كلمة المرور قصيرة جداً" : "Password is too short";
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
               ),
               Align(
                 alignment: lp.isRTL ? Alignment.centerLeft : Alignment.centerRight,
@@ -166,9 +193,11 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: _isLoading ? null : () async {
-                  setState(() => _isLoading = true);
-                  await ap.login(_emailController.text, _passwordController.text);
-                  if (mounted) setState(() => _isLoading = false);
+                  if (_formKey.currentState!.validate()) {
+                    setState(() => _isLoading = true);
+                    await ap.login(_emailController.text, _passwordController.text);
+                    if (mounted) setState(() => _isLoading = false);
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: FerroColors.amber,
@@ -210,11 +239,13 @@ class _LoginScreenState extends State<LoginScreen> {
     String? hintText,
     required IconData icon,
     bool isPassword = false,
+    String? Function(String?)? validator,
   }) {
-    return TextField(
+    return TextFormField(
       controller: controller,
       obscureText: isPassword,
       style: const TextStyle(color: FerroColors.textPrimary),
+      validator: validator,
       decoration: InputDecoration(
         labelText: label,
         hintText: hintText,
